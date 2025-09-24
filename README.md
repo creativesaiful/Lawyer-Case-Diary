@@ -1,61 +1,79 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+সেটআপ নির্দেশনা
+ধাপ ১: প্রজেক্ট ক্লোন করুন এবং ডিরেক্টরিতে যান
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Bash
 
-## About Laravel
+git clone YOUR_GIT_REPO_URL
+cd lawyer-case-diary
+(যদি গিট রিপো না থাকে, তাহলে উপরে দেওয়া Laravel project setup ধাপ থেকে শুরু করুন)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+ধাপ ২: প্রয়োজনীয় প্যাকেজ ইনস্টল করুন
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Bash
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+composer install
+npm install
+ধাপ ৩: .env ফাইল কনফিগার করুন
 
-## Learning Laravel
+.env.example ফাইলটি থেকে একটি কপি তৈরি করুন এবং এর নাম দিন .env।
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+আপনার ডেটাবেস এবং অন্যান্য সার্ভিসের জন্য ভেরিয়েবলগুলো আপডেট করুন।
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+ধাপ ৪: ডেটাবেস মাইগ্রেশন ও সিডিং
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+ডেটাবেস সার্ভার চালু আছে কিনা নিশ্চিত করুন।
 
-## Laravel Sponsors
+নিচের কমান্ডটি রান করে টেবিল তৈরি এবং একটি ডিফল্ট অ্যাডমিন ইউজার তৈরি করুন।
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Bash
 
-### Premium Partners
+php artisan migrate --seed
+ধাপ ৫: অ্যাপ্লিকেশন সার্ভ করুন
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Bash
 
-## Contributing
+php artisan serve
+এখন আপনি আপনার ব্রাউজারে http://127.0.0.1:8000 ভিজিট করতে পারবেন।
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+টেস্ট করার ধাপ (Quick Test Plan)
+নতুন Lawyer রেজিস্ট্রেশন: /register এ যান। ফর্ম পূরণ করুন এবং সাবমিট করুন। নিশ্চিত করুন যে ইউজার তৈরি হয়েছে কিন্তু approved স্ট্যাটাস false।
 
-## Code of Conduct
+অ্যাডমিন লগইন ও অ্যাপ্রুভ:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+ডিফল্ট অ্যাডমিন ইউজার দিয়ে লগইন করুন: মোবাইল 01700000001, পাসওয়ার্ড password।
 
-## Security Vulnerabilities
+admin/pending-lawyers এ যান।
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+পেমেন্ট স্ট্যাটাস ম্যানুয়ালি চেক করে নতুন রেজিস্টার করা ইউজারকে অ্যাপ্রুভ করুন।
 
-## License
+Lawyer লগইন (Remember Me):
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+নতুন অ্যাপ্রুভড লইয়ার ইউজার দিয়ে লগইন করুন এবং "Remember Me" চেক করুন।
+
+ব্রাউজার বন্ধ করে আবার খুলুন, নিশ্চিত করুন আপনি এখনও লগইন করা আছেন।
+
+স্টাফ তৈরি ও লগইন:
+
+লইয়ার ড্যাশবোর্ড থেকে একজন নতুন স্টাফ তৈরি করুন।
+
+নতুন স্টাফ দিয়ে লগইন করে নিশ্চিত করুন যে তাদের অ্যাক্সেস কেবল সেই চেম্বারের মামলার মধ্যে সীমাবদ্ধ।
+
+কেস CRUD ও AJAX সার্চ:
+
+কিছু নতুন মামলা তৈরি করুন।
+
+কেস লিস্ট পেজে গিয়ে তারিখ ফিল্টার এবং সার্চ বক্স ব্যবহার করে দেখুন রিলোড ছাড়া ফলাফল আপডেট হচ্ছে কিনা।
+
+SMS ও PDF এক্সপোর্ট:
+
+কেস লিস্ট থেকে একাধিক কেস সিলেক্ট করুন এবং "Send SMS" বাটনে ক্লিক করে মোডাল চালু করুন।
+
+টেস্ট SMS পাঠান।
+
+ফিল্টার করা বা সম্পূর্ণ তালিকা PDF এ এক্সপোর্ট করে দেখুন।
+
+ডায়নামিক DOCX:
+
+একটি মামলার বিস্তারিত পেজে যান।
+
+"Generate MS Word" অপশন থেকে একটি অ্যাপ্লিকেশন টাইপ সিলেক্ট করে .docx ফাইল ডাউনলোড করুন। নিশ্চিত করুন যে ফাইলের ভেতর মামলার তথ্যগুলো সঠিকভাবে এসেছে।
