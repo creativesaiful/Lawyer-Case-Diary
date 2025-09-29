@@ -18,4 +18,9 @@ class Chamber extends Model
     {
         return $this->hasMany(CaseDiary::class);
     }
+    public function dates()
+    {
+        return $this->hasMany(Date::class);
+    }
+
 }

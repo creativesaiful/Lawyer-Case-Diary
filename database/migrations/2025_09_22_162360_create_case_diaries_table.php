@@ -10,7 +10,7 @@ return new class extends Migration {
             $table->id();
             $table->unsignedBigInteger('chamber_id');
             $table->string('case_number');
-            $table->string('court_name');
+            $table->unsignedBigInteger('court_id');
             $table->string('plaintiff_name');
             $table->string('defendant_name');
             $table->string('client_mobile');
@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
 
+            $table->foreign('court_id')->references('id')->on('court_lists')->onDelete('cascade');
             $table->foreign('chamber_id')->references('id')->on('chambers')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
         });

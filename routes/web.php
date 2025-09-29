@@ -10,6 +10,8 @@ use App\Http\Controllers\SmsController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\HomeController;
 use App\Http\Middleware\RedirectIfNotApproved;
+use App\Http\Controllers\CourtController;
+use App\Http\Middleware\ChamberAccess;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,16 +49,35 @@ Route::middleware(['auth', RedirectIfNotApproved::class])->group(function () {
     });
 
     // Case Diary
-    Route::prefix('cases')->name('cases.')->group(function () {
-        Route::get('/', [CaseDiaryController::class, 'index'])->name('index');
-        Route::get('/create', [CaseDiaryController::class, 'create'])->name('create');
-        Route::post('/', [CaseDiaryController::class, 'store'])->name('store');
-        Route::get('/{caseDiary}', [CaseDiaryController::class, 'show'])->name('show')->middleware('chamber.access');
-        Route::get('/{caseDiary}/edit', [CaseDiaryController::class, 'edit'])->name('edit')->middleware('chamber.access');
-        Route::put('/{caseDiary}', [CaseDiaryController::class, 'update'])->name('update')->middleware('chamber.access');
-        Route::delete('/{caseDiary}', [CaseDiaryController::class, 'destroy'])->name('destroy')->middleware('chamber.access');
-        Route::get('/search', [CaseDiaryController::class, 'search'])->name('search');
-        Route::get('/pdf-export', [CaseDiaryController::class, 'exportPdf'])->name('export.pdf');
+    
+Route::prefix('cases')->name('cases.')->group(function () {
+    Route::get('/', [CaseDiaryController::class, 'index'])->name('index');
+    Route::get('/create', [CaseDiaryController::class, 'create'])->name('create');
+    Route::post('/', [CaseDiaryController::class, 'store'])->name('store');
+
+    Route::middleware(ChamberAccess::class)->group(function () {
+        Route::get('/{caseDiary}', [CaseDiaryController::class, 'show'])->name('show');
+        Route::get('/{caseDiary}/date-update', [CaseDiaryController::class, 'dateUpdate'])->name('date-update');
+        Route::post('/{caseDiary}/date-update', [CaseDiaryController::class, 'updateDate'])->name('date-update.post');
+        Route::get('/{caseDiary}/edit', [CaseDiaryController::class, 'edit'])->name('edit');
+        Route::put('/{caseDiary}', [CaseDiaryController::class, 'update'])->name('update');
+        Route::delete('/{caseDiary}', [CaseDiaryController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::get('/search', [CaseDiaryController::class, 'search'])->name('search');
+    Route::get('/pdf-export', [CaseDiaryController::class, 'exportPdf'])->name('export.pdf');
+});
+
+    // courts
+    Route::prefix('courts')->name('courts.')->group(function () {
+        Route::get('/', [CourtController::class, 'index'])->name('index');
+        Route::get('/create', [CourtController::class, 'create'])->name('create');
+        Route::post('/', [CourtController::class, 'store'])->name('store');
+        Route::get('/{court}/edit', [CourtController::class, 'edit'])->name('edit');
+        Route::put('/{court}', [CourtController::class, 'update'])->name('update');
+        Route::delete('/{court}', [CourtController::class, 'destroy'])->name('destroy');
+
+        
     });
 
     // Staff Registration

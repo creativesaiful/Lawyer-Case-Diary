@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpWord\TemplateProcessor;
+use App\Models\Date;
 
 class CaseDiaryController extends Controller
 {
@@ -86,31 +87,69 @@ class CaseDiaryController extends Controller
     {
         $this->authorize('create', CaseDiary::class);
 
+        // Validate the request
+        
         $validated = $request->validate([
             'case_number' => 'required|string',
-            'court_name' => 'required|string',
+            'court_id' => 'required|exists:court_lists,id',
             'plaintiff_name' => 'required|string',
             'defendant_name' => 'required|string',
-            'client_mobile' => 'required|string',
+            'client_mobile' => 'required|numeric|digits:11',//max 11 digits
             'lawyer_side' => 'required|string',
-            'next_date' => 'nullable|date',
-            'short_order' => 'nullable|string',
+            
             'details' => 'nullable|string',
         ]);
-        
+
         $validated['chamber_id'] = Auth::user()->chamber_id;
         $validated['created_by'] = Auth::id();
         
-        CaseDiary::create($validated);
         
+        CaseDiary::create($validated);
+
         return redirect()->route('cases.index')->with('success', 'Case created successfully.');
     }
 
     public function show(CaseDiary $caseDiary)
     {
+         
         $this->authorize('view', $caseDiary);
-        $comments = $caseDiary->comments()->with('user')->get();
-        return view('cases.show', compact('caseDiary', 'comments'));
+        
+        $dates = $caseDiary->dates()->orderBy('next_date', 'desc')->get();
+
+       
+        
+        return view('cases.show', compact('caseDiary', 'dates'));
+    }
+
+    public function dateUpdate(CaseDiary $caseDiary)
+    {
+        $this->authorize('update', $caseDiary);
+        return view('cases.date-update', compact('caseDiary'));
+    }
+
+    public function updateDate(Request $request, CaseDiary $caseDiary)
+    {
+        $this->authorize('update', $caseDiary);
+
+        $validated = $request->validate([
+            'next_date' => 'required|date|after_or_equal:today',
+            'short_order' => 'required|string',
+            'comments' => 'nullable|string',
+        ]);
+
+      //create a new date entry
+        $dateEntry = new Date();
+        $dateEntry->case_id = $caseDiary->id;
+        $dateEntry->next_date = $validated['next_date'];
+        $dateEntry->short_order = $validated['short_order'];
+        $dateEntry->comments = $validated['comments'] ?? '';
+        $dateEntry->updated_by = Auth::id();
+        $dateEntry->chamber_id = Auth::user()->chamber_id;
+        $dateEntry->save();
+
+
+
+        return redirect()->route('cases.index')->with('success', 'Next date updated successfully.');
     }
 
     public function edit(CaseDiary $caseDiary)
@@ -122,21 +161,20 @@ class CaseDiaryController extends Controller
 
     public function update(Request $request, CaseDiary $caseDiary)
     {
+        
         $this->authorize('update', $caseDiary);
-
+ 
         $validated = $request->validate([
             'case_number' => 'required|string',
-            'court_name' => 'required|string',
+            'court_id' => 'required|exists:court_lists,id',
             'plaintiff_name' => 'required|string',
             'defendant_name' => 'required|string',
-            'client_mobile' => 'required|string',
+            'client_mobile' => 'required|numeric|digits:11',//max 11 digits
             'lawyer_side' => 'required|string',
-            'next_date' => 'nullable|date',
-            'short_order' => 'nullable|string',
-            'details' => 'nullable|string',
+            'details' => 'nullable|string', 
         ]);
-
-        $validated['updated_by'] = Auth::id();
+ 
+        
         $caseDiary->update($validated);
 
         return redirect()->route('cases.index')->with('success', 'Case updated successfully.');

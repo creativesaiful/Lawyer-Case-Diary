@@ -36,4 +36,14 @@ class CaseDiary extends Model
     {
         return $this->hasMany(Payment::class, 'case_id');
     }
+
+    public function court()
+    {
+        return $this->belongsTo(CourtList::class);
+    }
+
+    public function dates()
+    {
+        return $this->hasMany(Date::class, 'case_id');
+    }
 }
