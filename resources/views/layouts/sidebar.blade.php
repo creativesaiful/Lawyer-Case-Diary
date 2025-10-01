@@ -2,6 +2,8 @@
 <div class="bg-light border-right collapse d-md-block" id="sidebarCollapse">
     <div class="list-group list-group-flush">
         @if(auth()->check())
+            <a href="{{ route('dashboard') }}" class="list-group-item list-group-item-action bg-light">Dashboard</a>
+
             @if(auth()->user()->isAdmin())
                 <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action bg-light">Dashboard</a>
                 <a href="{{ route('admin.pending.lawyers') }}" class="list-group-item list-group-item-action bg-light">Pending Lawyers</a>

@@ -149,8 +149,17 @@ class CaseDiaryController extends Controller
 
 
 
-        return redirect()->route('cases.index')->with('success', 'Next date updated successfully.');
+        return redirect()->route('dashboard')->with('success', 'Next date updated successfully.');
     }
+
+public function editDate(\App\Models\Date $date)
+{
+    // Authorize using the parent case
+    $this->authorize('update', $date->caseDiary);
+
+    return view('cases.date-edit', compact('date'));
+}
+
 
     public function edit(CaseDiary $caseDiary)
     {

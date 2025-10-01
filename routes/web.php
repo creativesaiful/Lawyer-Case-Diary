@@ -21,8 +21,9 @@ use App\Http\Middleware\ChamberAccess;
 
 // Home page with 'approved' middleware
 Route::get('/', [HomeController::class, 'index'])
-    ->name('home')
+    ->name('dashboard')
     ->middleware(['auth', RedirectIfNotApproved::class]);
+
 
 // Authentication
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -59,6 +60,9 @@ Route::prefix('cases')->name('cases.')->group(function () {
         Route::get('/{caseDiary}', [CaseDiaryController::class, 'show'])->name('show');
         Route::get('/{caseDiary}/date-update', [CaseDiaryController::class, 'dateUpdate'])->name('date-update');
         Route::post('/{caseDiary}/date-update', [CaseDiaryController::class, 'updateDate'])->name('date-update.post');
+
+Route::get('/date/{date}/edit', [CaseDiaryController::class, 'editDate'])->name('date-edit');
+
         Route::get('/{caseDiary}/edit', [CaseDiaryController::class, 'edit'])->name('edit');
         Route::put('/{caseDiary}', [CaseDiaryController::class, 'update'])->name('update');
         Route::delete('/{caseDiary}', [CaseDiaryController::class, 'destroy'])->name('destroy');

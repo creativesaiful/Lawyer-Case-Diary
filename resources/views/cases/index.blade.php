@@ -1,5 +1,30 @@
 @extends('layouts.app')
 
+@push('styles')
+<!-- DataTables CSS -->
+
+
+
+<style> 
+/* Highlight color for matched search text */
+.highlight {
+    background-color: yellow;
+    padding: 0 2px;
+    border-radius: 3px;
+}
+
+/* Optional: make the custom search box bigger */
+#search-input {
+    font-size: 16px;
+    height: 42px;
+}
+    #cases-table_filter {
+    display: none; /* Hide default search box */
+}
+
+</style>
+@endpush
+
 @section('content')
 <div class="container-fluid">
     <h2>Case Diaries</h2>
@@ -11,23 +36,21 @@
     
     <div class="row mb-3">
         <div class="col-md-6 mb-2">
-            <div class="input-group">
-                <input type="text" id="search-input" class="form-control" placeholder="Search cases...">
+            <div class="input-group mb-3">
+                <input type="text" id="search-input" class="form-control" placeholder="🔍 Search cases...">
             </div>
         </div>
-        <div class="col-md-4 mb-2">
-            <input type="date" id="date-filter" class="form-control">
-        </div>
-        <div class="col-md-2">
-            <button class="btn btn-primary w-100" onclick="exportToPdf()">Export PDF</button>
-        </div>
+
+       
     </div>
 
     <div id="case-list-container">
+        {{-- Make sure inside this partial table tag has id="cases-table" --}}
         @include('cases.partials.case-list-table')
     </div>
 </div>
 
+<!-- SMS Modal -->
 <div class="modal fade" id="smsModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -58,81 +81,43 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+
 <script>
-    // AJAX Search & Filter
-    const searchInput = document.getElementById('search-input');
-    const dateFilter = document.getElementById('date-filter');
-    const caseListContainer = document.getElementById('case-list-container');
-    let timeoutId;
-
-    function fetchCases() {
-        const query = searchInput.value;
-        const date = dateFilter.value;
-
-        axios.get('{{ route('cases.search') }}', {
-            params: { query, date }
-        })
-        .then(response => {
-            caseListContainer.innerHTML = response.data.html;
-        })
-        .catch(error => console.error(error));
-    }
-    
-    searchInput.addEventListener('input', () => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(fetchCases, 300); // Debounce
+$(document).ready(function () {
+    let table = $('#cases-table').DataTable({
+        dom: 'Bfrtip',
+        paging: true,
+        pageLength: 10,
+        lengthChange: true,
+        info: true,
+        searchHighlight: true,
+        buttons: [
+            {
+                extend: 'pdfHtml5',
+                text: '📄 Export PDF',
+                className: 'btn btn-danger btn-sm',
+                exportOptions: {
+                    columns: ':not(:last-child)'  // exclude last column (Actions)
+                }
+            },
+            {
+                extend: 'print',
+                text: '🖨️ Print Table',
+                className: 'btn btn-success btn-sm',
+                exportOptions: {
+                    columns: ':not(:last-child)'  // exclude last column (Actions)
+                }
+            }
+        ]
     });
-    
-    dateFilter.addEventListener('change', fetchCases);
 
-    // SMS Functionality
-    let selectedCases = [];
-    const smsModal = new bootstrap.Modal(document.getElementById('smsModal'));
+    // Custom search box
+    $('#search-input').on('keyup', function () {
+        table.search(this.value).draw();
+    });
+});
 
-    function toggleSelection(checkbox, mobile) {
-        if (checkbox.checked) {
-            selectedCases.push(mobile);
-        } else {
-            selectedCases = selectedCases.filter(item => item !== mobile);
-        }
-        document.getElementById('sms-numbers').value = selectedCases.join(', ');
-    }
-
-    function showSmsModal() {
-        if (selectedCases.length > 0) {
-            smsModal.show();
-        } else {
-            alert('Please select at least one case to send SMS.');
-        }
-    }
-
-    function sendSms() {
-        const message = document.getElementById('sms-message').value;
-        const mobileNumbers = selectedCases;
-        
-        axios.post('{{ route('send.sms') }}', {
-            mobile_numbers: mobileNumbers,
-            message: message,
-            _token: '{{ csrf_token() }}'
-        })
-        .then(response => {
-            alert(response.data.success);
-            smsModal.hide();
-            selectedCases = [];
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-        })
-        .catch(error => {
-            alert(error.response.data.error || 'Failed to send SMS.');
-        });
-    }
-    
-    // PDF Export
-    function exportToPdf() {
-        const query = searchInput.value;
-        const date = dateFilter.value;
-        const url = '{{ route('cases.export.pdf') }}' + `?query=${query}&date=${date}`;
-        window.open(url, '_blank');
-    }
 </script>
 @endpush

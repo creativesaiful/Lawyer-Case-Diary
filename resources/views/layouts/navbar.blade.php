@@ -8,7 +8,7 @@
             {{-- Check if a user is logged in --}}
             @auth
             <span class="navbar-text me-3">
-                {{ Auth::user()->name }}
+                {{ Auth::user()->name }} ({{ Auth::user()->role }})
             </span>
             <form action="{{ route('logout') }}" method="POST" class="d-inline">
                 @csrf
