@@ -3,8 +3,8 @@
         <thead>
             <tr>
                 <th><input type="checkbox" id="select-all"></th>
-                <th>Case No.</th>
-                <th>কের্ট</th>
+                <th>মামলা নং</th>
+                <th>কোর্ট</th>
                 <th>বাদী</th>
                 <th>বিবাদী</th>
                 <th>মোবাইল</th>
@@ -24,7 +24,7 @@
                     </td>
                     <td>
                         <a href="{{ route('cases.show', $case) }}" class="btn btn-sm btn-info">View</a>
-                        <a href="{{ route('cases.date-update', $case) }}" class="btn btn-sm btn-warning">Update</a>
+                        {{-- <a href="{{ route('cases.date-update', $case) }}" class="btn btn-sm btn-warning">Update</a> --}}
                         @if(auth()->user()->role === 'lawyer')
                         <a href="{{ route('cases.edit', $case) }}" class="btn btn-sm btn-warning">Edit</a>
                         <form action="{{ route('cases.destroy', $case) }}" method="POST" class="d-inline">

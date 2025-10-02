@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use App\Models\CaseDiary;
+
 
 class AdminController extends Controller
 {
@@ -35,7 +37,12 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        return view('admin.dashboard');
+        $totalLawyers = User::where('role', 'lawyer')->count();
+        $activeLawyers = User::where('role', 'lawyer')->where('approved', true)->count();
+        $pendingLawyers = User::where('role', 'lawyer')->where('approved', false)->count();
+        $totalStaff = User::where('role', 'staff')->count();
+
+        return view('admin.dashboard', compact('totalLawyers', 'activeLawyers', 'pendingLawyers', 'totalStaff'));
     }
 
     /**
@@ -43,36 +50,40 @@ class AdminController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function pendingLawyers()
+    public function lawyers()
     {
-        $pendingLawyers = User::where('role', 'lawyer')
-            ->where('approved', false)
+        $lawyers = User::where('role', 'lawyer')
             ->get();
 
-        return view('admin.pending-lawyers', compact('pendingLawyers'));
+        return view('admin.lawyers', compact('lawyers'));
     }
 
-    /**
-     * Approve a lawyer.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function approveLawyer(User $user)
-    {
-        $user->update(['approved' => true]);
-        return redirect()->route('admin.pending.lawyers')->with('success', 'Lawyer approved successfully!');
-    }
+    
+    // ajax function to update lawyer status
+  public function toggleStatus(Request $request)
+{
+    $lawyer = User::findOrFail($request->lawyer_id);
+    $lawyer->approved = $request->status;
+    $lawyer->save();
+
+    return response()->json(['message' => 'Lawyer status updated successfully!']);
+}
 
     /**
-     * Deny a lawyer.
+     * View a specific lawyer's details.
      *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\RedirectResponse
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
      */
-    public function denyLawyer(User $user)
+    public function viewLawyer($id)
     {
-        $user->delete();
-        return redirect()->route('admin.pending.lawyers')->with('success', 'Lawyer denied and deleted.');
+        $lawyer = User::where('role', 'lawyer')->findOrFail($id);
+        $totalStaff = User::where('role', 'staff')->where('chamber_id', $lawyer->chamber_id)->count();
+        $totalCases = CaseDiary::where('chamber_id', $lawyer->chamber_id)->count();
+        $plaintiffParties = CaseDiary::where('chamber_id', $lawyer->chamber_id)->where('lawyer_side', 'Plaintiff')->count();
+        $defendantParties = CaseDiary::where('chamber_id', $lawyer->chamber_id)->where('lawyer_side', 'Defendant')->count();
+ 
+        return view('admin.view_lawyer', compact('lawyer' , 'totalStaff', 'totalCases', 'plaintiffParties', 'defendantParties'));
     }
+
 }

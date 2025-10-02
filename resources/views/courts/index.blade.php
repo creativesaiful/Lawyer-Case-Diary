@@ -7,8 +7,8 @@
     <thead>
         <tr>
             <th scope="col">#</th>
-            <th scope="col">Court Name</th>
-            <th scope="col">Judge Name</th>
+            <th scope="col">কোর্টের নাম</th>
+            <th scope="col">বিচারক</th>
             <th scope="col">Actions</th>
         </tr>
     </thead>

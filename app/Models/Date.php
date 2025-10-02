@@ -15,9 +15,9 @@ class Date extends Model
     {
         return $this->belongsTo(CaseDiary::class, 'case_id');
     }
-
-    public function chamber()
+    public function user()
     {
-        return $this->belongsTo(Chamber::class, 'chamber_id');
+        return $this->belongsTo(User::class, 'updated_by');
     }
+    
 }

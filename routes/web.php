@@ -44,9 +44,14 @@ Route::middleware(['auth', RedirectIfNotApproved::class])->group(function () {
     // Admin Routes
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
-        Route::get('/pending-lawyers', [AdminController::class, 'pendingLawyers'])->name('pending.lawyers');
-        Route::post('/approve/{user}', [AdminController::class, 'approveLawyer'])->name('approve.user');
-        Route::post('/deny/{user}', [AdminController::class, 'denyLawyer'])->name('deny.user');
+        Route::get('/lawyers', [AdminController::class, 'lawyers'])->name('lawyers');
+Route::post('/lawyers/toggle-status', [AdminController::class, 'toggleStatus'])->name('lawyers.toggleStatus');
+
+        Route::get('/lawyers/{lawyer}', [AdminController::class, 'viewLawyer'])->name('lawyers.view');
+      
+        
+
+        
     });
 
     // Case Diary
@@ -56,16 +61,22 @@ Route::prefix('cases')->name('cases.')->group(function () {
     Route::get('/create', [CaseDiaryController::class, 'create'])->name('create');
     Route::post('/', [CaseDiaryController::class, 'store'])->name('store');
 
+    
+
     Route::middleware(ChamberAccess::class)->group(function () {
         Route::get('/{caseDiary}', [CaseDiaryController::class, 'show'])->name('show');
-        Route::get('/{caseDiary}/date-update', [CaseDiaryController::class, 'dateUpdate'])->name('date-update');
-        Route::post('/{caseDiary}/date-update', [CaseDiaryController::class, 'updateDate'])->name('date-update.post');
+ 
 
-Route::get('/date/{date}/edit', [CaseDiaryController::class, 'editDate'])->name('date-edit');
+        Route::get('/date/{date}/edit', [CaseDiaryController::class, 'editDate'])->name('date-edit');
+        Route::put('/date/{date}', [CaseDiaryController::class, 'editedDateUpdate'])->name('edited-date.update');
+
 
         Route::get('/{caseDiary}/edit', [CaseDiaryController::class, 'edit'])->name('edit');
         Route::put('/{caseDiary}', [CaseDiaryController::class, 'update'])->name('update');
         Route::delete('/{caseDiary}', [CaseDiaryController::class, 'destroy'])->name('destroy');
+        
+          Route::post('/generate-docx/{caseDiary}', [CaseDiaryController::class, 'generateDocx'])
+    ->name('generate.docx');
     });
 
     Route::get('/search', [CaseDiaryController::class, 'search'])->name('search');
@@ -98,7 +109,8 @@ Route::get('/date/{date}/edit', [CaseDiaryController::class, 'editDate'])->name(
 
     // SMS & Dynamic DOCX
     Route::post('/send-sms', [SmsController::class, 'sendSms'])->name('send.sms');
-    Route::post('/generate-docx', [CaseDiaryController::class, 'generateDocx'])->name('generate.docx');
+
+
     Route::post('/{case}/comment', [CaseDiaryController::class, 'addComment'])->name('comment.add');
 
     // Bkash Payment

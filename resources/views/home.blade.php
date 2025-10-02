@@ -38,7 +38,7 @@
                             <thead>
                                 <tr>
                                     <th><input type="checkbox" id="select-all"></th>
-                                    <th>Case No.</th>
+                                    <th>মামলা নং</th>
                                     <th>কোর্ট </th>
                                     <th>বাদী</th>
                                     <th>বিবাদী</th>
@@ -50,6 +50,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($todayCases as $case)
+                              
                                     <tr>
                                         <td>
                                             <input type="checkbox"
@@ -96,7 +97,7 @@
                                             @endif
 
 
-                                            <a href="{{ route('cases.show', $case) }}" class="btn btn-sm btn-info">View</a>
+                                            <a href="{{ route('cases.show', $case->case_id) }}" class="btn btn-sm btn-info">View</a>
                                         </td>
                                     </tr>
                                 @endforeach

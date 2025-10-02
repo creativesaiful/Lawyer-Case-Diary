@@ -98,46 +98,19 @@ class CaseDiaryController extends Controller
             'lawyer_side' => 'required|string',
             
             'details' => 'nullable|string',
-        ]);
 
-        $validated['chamber_id'] = Auth::user()->chamber_id;
-        $validated['created_by'] = Auth::id();
-        
-        
-        CaseDiary::create($validated);
-
-        return redirect()->route('cases.index')->with('success', 'Case created successfully.');
-    }
-
-    public function show(CaseDiary $caseDiary)
-    {
-         
-        $this->authorize('view', $caseDiary);
-        
-        $dates = $caseDiary->dates()->orderBy('next_date', 'desc')->get();
-
-       
-        
-        return view('cases.show', compact('caseDiary', 'dates'));
-    }
-
-    public function dateUpdate(CaseDiary $caseDiary)
-    {
-        $this->authorize('update', $caseDiary);
-        return view('cases.date-update', compact('caseDiary'));
-    }
-
-    public function updateDate(Request $request, CaseDiary $caseDiary)
-    {
-        $this->authorize('update', $caseDiary);
-
-        $validated = $request->validate([
+            // date model related fields
             'next_date' => 'required|date|after_or_equal:today',
             'short_order' => 'required|string',
             'comments' => 'nullable|string',
         ]);
 
-      //create a new date entry
+        $validated['chamber_id'] = Auth::user()->chamber_id;
+        $validated['created_by'] = Auth::id();
+        
+        // Create the case diary entry and store the case_id in a variable to use for date entry. We can use insertGetId as well.
+        $caseDiary = CaseDiary::create($validated);
+        // Create the initial date entry
         $dateEntry = new Date();
         $dateEntry->case_id = $caseDiary->id;
         $dateEntry->next_date = $validated['next_date'];
@@ -148,16 +121,49 @@ class CaseDiaryController extends Controller
         $dateEntry->save();
 
 
-
-        return redirect()->route('dashboard')->with('success', 'Next date updated successfully.');
+        return redirect()->route('cases.index')->with('success', 'Case created successfully.');
     }
+
+    public function show(CaseDiary $caseDiary)
+    {
+        
+        $this->authorize('view', $caseDiary);
+        
+        $dates = $caseDiary->dates()->orderBy('next_date', 'desc')->get();
+
+       
+        
+        return view('cases.show', compact('caseDiary', 'dates'));
+    }
+
+   
 
 public function editDate(\App\Models\Date $date)
 {
     // Authorize using the parent case
     $this->authorize('update', $date->caseDiary);
 
+ 
     return view('cases.date-edit', compact('date'));
+}
+
+
+public function editedDateUpdate(Request $request, Date $date)
+{
+    // Authorize using the parent case
+    $this->authorize('update', $date->caseDiary);
+
+  
+    $validated = $request->validate([
+        'next_date' => 'required|date|after_or_equal:today',
+        'short_order' => 'required|string',
+        'comments' => 'nullable|string',
+    ]);
+    
+
+    $date->update($validated);
+
+    return redirect()->route('dashboard')->with('success', 'Date updated successfully.');
 }
 
 
@@ -224,26 +230,38 @@ public function editDate(\App\Models\Date $date)
     }
 
     public function generateDocx(Request $request, CaseDiary $caseDiary)
-    {
-        $this->authorize('view', $caseDiary);
-
-        $templateProcessor = new TemplateProcessor(storage_path('app/templates/application_template.docx'));
-        
-        // Dynamic data
-        $templateProcessor->setValue('case_number', $caseDiary->case_number);
-        $templateProcessor->setValue('court_name', $caseDiary->court_name);
-        $templateProcessor->setValue('plaintiff_name', $caseDiary->plaintiff_name);
-        $templateProcessor->setValue('defendant_name', $caseDiary->defendant_name);
-        $templateProcessor->setValue('lawyer_side', $caseDiary->lawyer_side);
-        $templateProcessor->setValue('next_date', $caseDiary->next_date ? $caseDiary->next_date->format('Y-m-d') : 'N/A');
-        $templateProcessor->setValue('short_order', $caseDiary->short_order);
-        
-        $filename = 'Application_' . $caseDiary->case_number . '.docx';
-        $templateProcessor->saveAs(public_path('downloads/' . $filename));
-
-        return response()->download(public_path('downloads/' . $filename))->deleteFileAfterSend(true);
-    }
+{
+     
     
+    $this->authorize('view', $caseDiary);
+
+
+
+    $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor(storage_path('app/templates/application_template.docx'));
+ 
+ 
+    $templateProcessor->setValue('case_number', $caseDiary->case_number);
+    
+    $templateProcessor->setValue('court_name', $caseDiary->court->court_name);
+    $templateProcessor->setValue('plaintiff_name', $caseDiary->plaintiff_name);
+    $templateProcessor->setValue('defendant_name', $caseDiary->defendant_name);
+    $templateProcessor->setValue('lawyer_side', $caseDiary->lawyer_side === 'Plaintiff' ? 'বাদী' : 'বিবাদী');
+
+
+    $templateProcessor->setValue('short_order', $request->short_order);
+  
+
+
+    $filename = 'Application_' . $caseDiary->case_number . '.docx';
+    $filePath = storage_path('app/public/' . $filename);
+    $templateProcessor->saveAs($filePath);
+
+    return response()->file($filePath, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'Content-Disposition' => 'inline; filename="'.$filename.'"',
+    ]);
+}
+
     public function addComment(Request $request, CaseDiary $case)
     {
         $this->authorize('view', $case);

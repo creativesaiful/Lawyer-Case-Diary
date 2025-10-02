@@ -49,6 +49,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function dates()
+    {
+        return $this->hasMany(Date::class);
+    }
     
     public function isAdmin()
     {
@@ -64,4 +69,6 @@ class User extends Authenticatable
     {
         return $this->role === 'staff';
     }
+
+
 }

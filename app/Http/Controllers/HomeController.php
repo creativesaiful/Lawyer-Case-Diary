@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\CaseDiary;
 use App\Models\Date;
+use Toastr;
 
 class HomeController extends Controller
 {
@@ -23,27 +24,27 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index( Request $request)
-    {
-        
-        if($request->has('selected_date')) {
-            $selectedDate = $request->input('selected_date');
-        } else {
-            $selectedDate = now()->toDateString();
-        }
+    public function index(Request $request)
+{
+    $user = auth()->user();
 
-        $user = auth()->user();
-        $chamber = $user->chamber;
+    // 🔹 Redirect admin role to admin dashboard
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
 
-       
-        $todayCases = Date::where('chamber_id', $chamber->id)
+    // 🔹 Lawyers and staff will stay on normal dashboard
+    $selectedDate = $request->input('selected_date', now()->toDateString());
+
+    $chamber = $user->chamber;
+
+    $todayCases = Date::where('chamber_id', $chamber->id)
                         ->whereDate('next_date', $selectedDate)
                         ->get();
-        
 
-        
-        return view('home', compact('todayCases' , 'selectedDate'));
-    }
+    return view('home', compact('todayCases', 'selectedDate'));
+}
+
 
     public function searchByDate($date)
     {

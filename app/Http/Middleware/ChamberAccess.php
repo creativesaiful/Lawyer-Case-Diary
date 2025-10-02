@@ -16,14 +16,20 @@ class ChamberAccess
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function handle(Request $request, Closure $next): Response
-    {
-        $caseDiary = $request->route('caseDiary');
+   public function handle(Request $request, Closure $next): Response
+{
+    $caseDiary = $request->route('caseDiary');
+    $date = $request->route('date');
 
-        if ($caseDiary && Auth::check() && Auth::user()->chamber_id === $caseDiary->chamber_id) {
-            return $next($request);
-        }
-
-        abort(403, 'Unauthorized access to this case.');
+    if ($caseDiary && Auth::check() && Auth::user()->chamber_id === $caseDiary->chamber_id) {
+        return $next($request);
     }
+
+    if ($date && Auth::check() && Auth::user()->chamber_id === $date->caseDiary->chamber_id) {
+        return $next($request);
+    }
+
+    abort(403, 'Unauthorized access to this case.');
+}
+
 }

@@ -74,4 +74,15 @@
       0 => 'Phiki\\Adapters\\Laravel\\PhikiServiceProvider',
     ),
   ),
+  'php-flasher/flasher-laravel' => 
+  array (
+    'aliases' => 
+    array (
+      'Flasher' => 'Flasher\\Laravel\\Facade\\Flasher',
+    ),
+    'providers' => 
+    array (
+      0 => 'Flasher\\Laravel\\FlasherServiceProvider',
+    ),
+  ),
 );
